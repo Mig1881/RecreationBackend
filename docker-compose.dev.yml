@@ -1,0 +1,16 @@
+name: ane-api-dev
+services:
+  db:
+    image: mysql:8.0.32
+    container_name: ane_db_dev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ane_db
+    ports:
+      - "3306:3306"
+#    volumes:
+#      - mysql_data_dev:/var/lib/mysql
+#
+#volumes:
+#  mysql_data_dev:
