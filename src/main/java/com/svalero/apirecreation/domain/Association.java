@@ -1,9 +1,12 @@
 package com.svalero.apirecreation.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,4 +36,21 @@ public class Association {
 
     @Column(name = "logo_base64", columnDefinition = "LONGTEXT")
     private String logoBase64;
+
+    // --- RELACIONES BIDIRECCIONALES ---
+
+    // Miembros que pertenecen a esta asociación
+    @JsonIgnore
+    @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Membership> memberships;
+
+    // Eventos que esta asociación organiza
+    @JsonIgnore
+    @OneToMany(mappedBy = "organizingAssociation", cascade = CascadeType.ALL)
+    private List<Event> organizedEvents;
+
+    // Eventos a los que esta asociación asiste como invitada
+    @JsonIgnore
+    @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventAttendance> eventAttendances;
 }
