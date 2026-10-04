@@ -3,11 +3,13 @@ package com.svalero.apirecreation.service;
 import com.svalero.apirecreation.domain.Association;
 import com.svalero.apirecreation.exception.AssociationNotFoundException;
 import com.svalero.apirecreation.repository.AssociationRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class AssociationService {
 
