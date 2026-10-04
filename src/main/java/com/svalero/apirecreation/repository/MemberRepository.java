@@ -16,4 +16,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // Validaciones de existencia rápida antes de guardar
     boolean existsByEmail(String email);
     boolean existsByNationalId(String nationalId);
+    //pte
 }
