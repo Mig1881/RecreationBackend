@@ -1,7 +1,10 @@
 package com.svalero.apirecreation.controller;
 
 import com.svalero.apirecreation.domain.Member;
+import com.svalero.apirecreation.domain.dto.MembershipOutDto;
 import com.svalero.apirecreation.service.MemberService;
+import com.svalero.apirecreation.service.MembershipService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,12 +12,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/members")
 public class MemberController {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private MembershipService membershipService;
 
     // GET: /api/members
     @GetMapping
@@ -49,5 +56,21 @@ public class MemberController {
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @GetMapping("/me/memberships")
+    public ResponseEntity<List<MembershipOutDto>> getMyMemberships(org.springframework.security.core.Authentication authentication) {
+
+        // 1. Extraemos el email del usuario logueado directamente del token JWT
+        String email = authentication.getName();
+
+        // 2. Buscamos al miembro en la base de datos
+        Member currentMember = memberService.findByEmail(email);
+
+        // 3. Obtenemos todas sus asociaciones usando el servicio que creamos antes
+        List<MembershipOutDto> myMemberships = membershipService.getMembershipsByMemberId(currentMember.getId());
+
+        log.info("Enviando {} asociaciones al frontend para el usuario {}", myMemberships.size(), email);
+
+        return new ResponseEntity<>(myMemberships, HttpStatus.OK);
     }
 }

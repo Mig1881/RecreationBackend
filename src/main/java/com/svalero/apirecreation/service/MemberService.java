@@ -3,12 +3,14 @@ package com.svalero.apirecreation.service;
 import com.svalero.apirecreation.domain.Member;
 import com.svalero.apirecreation.exception.MemberNotFoundException;
 import com.svalero.apirecreation.repository.MemberRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class MemberService {
 
@@ -25,6 +27,11 @@ public class MemberService {
     public Member findById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new MemberNotFoundException("Miembro no encontrado con ID: " + id));
+    }
+
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException("Miembro no encontrado con email: " + email));
     }
 
     public Member save(Member member) {
@@ -50,9 +57,11 @@ public class MemberService {
         existingMember.setEmail(memberDetails.getEmail());
         existingMember.setRole(memberDetails.getRole());
 
-        // La actualización de contraseña e imagen (Cloudinary) la solemos manejar
-        // en métodos separados más adelante por seguridad, así que aquí actualizamos
-        // solo los datos básicos del perfil.
+        // Añadimos la actualización de la URL de Cloudinary
+        existingMember.setImageUrl(memberDetails.getImageUrl());
+
+        // La actualización de contraseña la mantenemos fuera por seguridad.
+        // Solo actualizamos los datos básicos y la URL del perfil.
 
         return memberRepository.save(existingMember);
     }

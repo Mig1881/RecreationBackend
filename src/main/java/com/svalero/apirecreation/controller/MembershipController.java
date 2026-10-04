@@ -1,8 +1,9 @@
 package com.svalero.apirecreation.controller;
 
-import com.svalero.apirecreation.domain.Membership;
 import com.svalero.apirecreation.domain.dto.MembershipDTO;
+import com.svalero.apirecreation.domain.dto.MembershipOutDto;
 import com.svalero.apirecreation.service.MembershipService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/memberships")
 public class MembershipController {
@@ -18,13 +20,13 @@ public class MembershipController {
     private MembershipService membershipService;
 
     @GetMapping
-    public ResponseEntity<List<Membership>> getAllMemberships() {
+    public ResponseEntity<List<MembershipOutDto>> getAllMemberships() {
         return new ResponseEntity<>(membershipService.findAll(), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Membership> createMembership(@RequestBody MembershipDTO dto) {
-        Membership created = membershipService.registerMembership(dto);
+    public ResponseEntity<MembershipOutDto> createMembership(@RequestBody MembershipDTO dto) {
+        MembershipOutDto created = membershipService.registerMembership(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
