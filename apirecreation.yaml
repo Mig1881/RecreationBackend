@@ -1,0 +1,1161 @@
+openapi: 3.0.3
+info:
+  title: API Recreación Histórica (Historic Recreation API)
+  description: |
+    API REST para la gestión integral de asociaciones de recreación histórica, recreadores (miembros), eventos, participaciones y control de armamento.
+    
+    Incluye sistema de autenticación JWT y generación de listados oficiales para la Intervención de Armas.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8081'
+    description: Servidor Local de Desarrollo
+
+# --- CONFIGURACIÓN DEL TOKEN JWT ---
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+    description: Operaciones públicas de autenticación y registro
+  - name: associations
+    description: Operaciones con las asociaciones históricas
+  - name: members
+    description: Operaciones con los recreadores (miembros)
+  - name: events
+    description: Operaciones con los eventos (Públicos y Privados)
+  - name: participations
+    description: Operaciones de inscripción de recreadores a eventos
+  - name: attendances
+    description: Operaciones de asistencia de asociaciones a eventos
+  - name: memberships
+    description: Operaciones de pertenencia de recreadores a asociaciones
+
+paths:
+  # ==========================================
+  # AUTHENTICATION
+  # ==========================================
+  /api/auth/register:
+    post:
+      tags:
+        - auth
+      summary: Registra un nuevo recreador
+      description: Da de alta un nuevo miembro en el sistema. Asigna rol MEMBER por defecto. Endpoint público.
+      security: []
+      requestBody:
+        description: Detalles de registro del nuevo recreador
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupDto'
+      responses:
+        '200':
+          description: Recreador registrado con éxito
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "¡Recreador registrado con éxito!"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/auth/login:
+    post:
+      tags:
+        - auth
+      summary: Autenticación de usuario
+      description: Valida las credenciales y devuelve un token JWT firmado. Endpoint público.
+      security: []
+      requestBody:
+        description: Credenciales de acceso (Email y Password)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Credenciales inválidas (Unauthorized)
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # ASSOCIATIONS
+  # ==========================================
+  /api/associations:
+    get:
+      tags:
+        - associations
+      summary: Devuelve las asociaciones registradas
+      description: Obtiene un listado de todas las asociaciones histórico-culturales.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Association'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - associations
+      summary: Registra una asociación
+      description: Da de alta una nueva asociación en la base de datos.
+      requestBody:
+        description: Detalles de la nueva asociación
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Association'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Association'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/associations/{id}:
+    get:
+      tags:
+        - associations
+      summary: Detalle de una Asociación
+      description: Devuelve los detalles de una asociación por Id
+      parameters:
+        - name: id
+          in: path
+          description: Identificador de la asociación
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Association'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - associations
+      summary: Modifica una asociación
+      description: Actualiza los detalles de una asociación existente
+      parameters:
+        - name: id
+          in: path
+          description: Identificador de la asociación
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Nuevos detalles de la asociación
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Association'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Association'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - associations
+      summary: Elimina una asociación
+      description: Da de baja una asociación por su ID
+      parameters:
+        - name: id
+          in: path
+          description: Identificador de la asociación
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # MEMBERS
+  # ==========================================
+  /api/members:
+    get:
+      tags:
+        - members
+      summary: Devuelve todos los recreadores
+      description: Obtiene el listado de todos los miembros del sistema
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - members
+      summary: Registra un miembro (Directo)
+      description: Alta directa de un miembro desde administración
+      requestBody:
+        description: Detalles del miembro
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Member'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/members/me/memberships:
+    get:
+      tags:
+        - members
+      summary: Obtener asociaciones del usuario actual
+      description: Devuelve el listado de asociaciones a las que pertenece el recreador autenticado según su token JWT. Este endpoint evita inflar el payload del JWT con relaciones dinámicas.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MembershipOutDto'
+        '401':
+          description: Unauthorized (Token no válido o expirado)
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/members/{id}:
+    get:
+      tags:
+        - members
+      summary: Detalle de un recreador
+      description: Devuelve los detalles de un miembro por su Id
+      parameters:
+        - name: id
+          in: path
+          description: Identificador del miembro
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - members
+      summary: Actualiza un miembro
+      description: Permite modificar el perfil de un recreador
+      parameters:
+        - name: id
+          in: path
+          description: Identificador del miembro
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Nuevos detalles
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Member'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - members
+      summary: Elimina un miembro
+      description: Da de baja un miembro por su Id
+      parameters:
+        - name: id
+          in: path
+          description: Identificador del miembro
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # EVENTS
+  # ==========================================
+  /api/events:
+    get:
+      tags:
+        - events
+      summary: Lista todos los eventos
+      description: Obtiene todos los eventos mediante DTO plano (incluye IDs de asociaciones asistentes).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventOutDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - events
+      summary: Crea un nuevo evento
+      description: Registra un evento. El cuerpo recibe la entidad para polimorfismo, pero devuelve un DTO plano.
+      requestBody:
+        description: Datos del evento (Puede ser PublicEvent o PrivateEvent)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOutDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/events/published:
+    get:
+      tags:
+        - events
+      summary: Eventos confirmados/publicados
+      description: Obtiene solo los eventos que han sido marcados como 'published'. Devuelve DTO.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventOutDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/events/{id}:
+    get:
+      tags:
+        - events
+      summary: Detalle de evento
+      description: Obtiene los detalles de un evento concreto en formato DTO.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOutDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - events
+      summary: Actualiza un evento
+      description: Modifica los datos de un evento y devuelve el DTO actualizado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOutDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - events
+      summary: Eliminar evento
+      description: Borra un evento de la base de datos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/events/{eventId}/export-participants:
+    get:
+      tags:
+        - events
+      summary: Exporta el listado oficial a CSV
+      description: Genera un CSV de tiradores para la Intervención de Armas. **Requiere Rol ADMIN o PRESIDENT**.
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Archivo CSV generado
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Forbidden (No tiene permisos)
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # PARTICIPATIONS (Recreador -> Evento)
+  # ==========================================
+  /api/participations:
+    get:
+      tags:
+        - participations
+      summary: Obtiene todas las inscripciones
+      description: Listado general de todas las inscripciones devuelto en formato OutDto plano.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventParticipationOutDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - participations
+      summary: Inscribe a un recreador
+      description: Genera una inscripción indicando el arma. Devuelve un DTO plano.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventParticipationDTO'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventParticipationOutDto'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/participations/{id}:
+    delete:
+      tags:
+        - participations
+      summary: Borrar inscripción
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/participations/event/{eventId}:
+    get:
+      tags:
+        - participations
+      summary: Inscripciones por Evento
+      description: Obtiene todos los recreadores inscritos a un evento concreto (DTO plano)
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventParticipationOutDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/participations/member/{memberId}:
+    get:
+      tags:
+        - participations
+      summary: Inscripciones por Miembro
+      description: Obtiene todos los eventos a los que ha asistido un recreador (DTO plano)
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventParticipationOutDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # ATTENDANCES (Asociación -> Evento)
+  # ==========================================
+  /api/attendances:
+    get:
+      tags:
+        - attendances
+      summary: Asistencias de asociaciones
+      description: Lista las asistencias oficiales de asociaciones a eventos mediante DTO plano.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventAttendanceOutDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - attendances
+      summary: Registrar asistencia de grupo
+      description: Inscribe a una Asociación a un evento. Devuelve DTO plano.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventAttendanceDTO'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAttendanceOutDto'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/attendances/{id}:
+    delete:
+      tags:
+        - attendances
+      summary: Eliminar asistencia de grupo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # MEMBERSHIPS (Recreador -> Asociación)
+  # ==========================================
+  /api/memberships:
+    get:
+      tags:
+        - memberships
+      summary: Relaciones Recreador-Asociación
+      description: Devuelve el listado plano de a qué asociaciones pertenece cada recreador.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MembershipOutDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - memberships
+      summary: Asociar miembro a grupo
+      description: Da de alta a un miembro dentro de una Asociación. Devuelve DTO plano.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipDTO'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipOutDto'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/memberships/{id}:
+    delete:
+      tags:
+        - memberships
+      summary: Desvincular miembro de grupo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # --- DTOs IN DE SEGURIDAD ---
+    LoginDto:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    SignupDto:
+      type: object
+      required: [nationalId, firstName, lastName, email, password]
+      properties:
+        nationalId:
+          type: string
+          example: "98765432X"
+        firstName:
+          type: string
+          example: "Miguel Ángel"
+        lastName:
+          type: string
+          example: "Rubio"
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        phone:
+          type: string
+        birthDate:
+          type: string
+          format: date
+
+    JwtResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        id:
+          type: integer
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+
+    # --- DTOs TRANSACCIONALES (ENTRADA) ---
+    EventParticipationDTO:
+      type: object
+      required: [eventId, memberId]
+      properties:
+        eventId:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+        carriedWeapon:
+          type: string
+          example: "Mosquete Charleville"
+        weaponModel:
+          type: string
+          example: "Modelo 1777"
+
+    EventAttendanceDTO:
+      type: object
+      required: [associationId, eventId]
+      properties:
+        associationId:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+
+    MembershipDTO:
+      type: object
+      required: [associationId, memberId]
+      properties:
+        associationId:
+          type: integer
+          format: int64
+        memberId:
+          type: integer
+          format: int64
+
+    # --- NUEVOS DTOs DE SALIDA (OUT) PLANOS ---
+    EventOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventType:
+          type: string
+          enum: [PUBLIC, PRIVATE]
+        eventCode:
+          type: string
+          example: "ZAR-1808"
+        organizingAssociationId:
+          type: integer
+          format: int64
+        organizingAssociationName:
+          type: string
+          example: "Voluntarios de Aragón"
+        country:
+          type: string
+          example: "España"
+        city:
+          type: string
+          example: "Zaragoza"
+        reenactorsCount:
+          type: integer
+        visitorsCount:
+          type: integer
+        cost:
+          type: number
+          format: double
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        published:
+          type: boolean
+        publicEntity:
+          type: string
+          example: "Ayuntamiento de Zaragoza"
+        subsidy:
+          type: number
+          format: double
+        sponsor:
+          type: string
+        initialBudget:
+          type: number
+          format: double
+        openToPublic:
+          type: boolean
+        attendingAssociationIds:
+          type: array
+          description: "Lista plana de los IDs de las asociaciones asistentes a este evento"
+          items:
+            type: integer
+            format: int64
+
+    EventParticipationOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+        eventCode:
+          type: string
+        memberId:
+          type: integer
+          format: int64
+        memberFullName:
+          type: string
+        carriedWeapon:
+          type: string
+        weaponModel:
+          type: string
+
+    EventAttendanceOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+        eventCode:
+          type: string
+        associationId:
+          type: integer
+          format: int64
+        associationName:
+          type: string
+
+    MembershipOutDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        associationId:
+          type: integer
+          format: int64
+        associationName:
+          type: string
+        memberId:
+          type: integer
+          format: int64
+        memberFullName:
+          type: string
+
+    # --- ENTIDADES (DOMINIO BASE / INPUT JSON) ---
+    Association:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        taxId:
+          type: string
+          example: "G12345678"
+        foundationYear:
+          type: integer
+          example: 2004
+        name:
+          type: string
+          example: "Voluntarios de Aragón"
+        allegiance:
+          type: string
+          example: "Ejército Español"
+        historicalAttire:
+          type: string
+          example: "Uniforme blanco con divisas verdes"
+        logoBase64:
+          type: string
+          example: "iVBORw0KGgoAAAANSUhEUgAA..."
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nationalId:
+          type: string
+          example: "98765432X"
+        lastName:
+          type: string
+        firstName:
+          type: string
+        phone:
+          type: string
+        associationPosition:
+          type: string
+          example: "Presidente"
+        historicalRank:
+          type: string
+          example: "Sargento"
+        weaponLicense:
+          type: string
+          example: "AE-234234"
+        birthDate:
+          type: string
+          format: date
+        enrollmentDate:
+          type: string
+          format: date
+        imageUrl:
+          type: string
+          format: uri
+        email:
+          type: string
+        password:
+          type: string
+          description: "Hash encriptado BCrypt (Oculto en respuestas reales)"
+        role:
+          type: string
+          example: "MEMBER"
+
+    Event:
+      type: object
+      discriminator:
+        propertyName: eventType
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventType:
+          type: string
+          enum: [PUBLIC, PRIVATE]
+          description: "Campo discriminador requerido para Jackson"
+        eventCode:
+          type: string
+          example: "ZAR-1808"
+        organizingAssociation:
+          $ref: '#/components/schemas/Association'
+        country:
+          type: string
+          example: "España"
+        city:
+          type: string
+          example: "Zaragoza"
+        reenactorsCount:
+          type: integer
+        visitorsCount:
+          type: integer
+        cost:
+          type: number
+          format: double
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        published:
+          type: boolean
+
+    PublicEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            publicEntity:
+              type: string
+              example: "Ayuntamiento de Zaragoza"
+            subsidy:
+              type: number
+              format: double
+
+    PrivateEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            sponsor:
+              type: string
+              example: "Asociación Napoleónica Española"
+            initialBudget:
+              type: number
+              format: double
+            openToPublic:
+              type: boolean
+
+    # --- ESQUEMAS DE ERROR ---
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Petición mal formada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2026-05-29T10:15:30.123"
+            status: 400
+            error: "Bad Request"
+            message: "JSON parse error"
+            path: "/api/events"
+
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2026-05-29T10:15:30.123"
+            status: 404
+            error: "Not Found"
+            message: "Entidad no encontrada con el ID indicado"
+            path: "/api/members/99"
+
+    Conflict:
+      description: Violación de integridad/Duplicidad
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2026-05-29T10:15:30.123"
+            status: 409
+            error: "Conflict"
+            message: "El registro ya existe en la base de datos."
+            path: "/api/participations"
+
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2026-05-29T10:15:30.123"
+            status: 500
+            error: "Internal Server Error"
+            message: "Ha ocurrido un error inesperado..."
+            path: "/api/associations"
