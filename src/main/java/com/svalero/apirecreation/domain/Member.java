@@ -44,9 +44,6 @@ public class Member {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "enrollment_date")
-    private LocalDate enrollmentDate;
-
     @Column(name = "image_url")
     private String imageUrl; // Aquí guardaremos la URL que nos devuelva Cloudinary
 

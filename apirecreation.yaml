@@ -209,7 +209,33 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-
+  /api/associations/{id}/memberships:
+    get:
+      tags:
+        - associations
+      summary: Recreadores de una asociación
+      description: Devuelve el listado completo de miembros (expedientes) que pertenecen a una asociación específica, incluyendo sus fechas de alta y baja lógica.
+      parameters:
+        - name: id
+          in: path
+          description: Identificador de la asociación
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MembershipOutDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   # ==========================================
   # MEMBERS
   # ==========================================
@@ -957,6 +983,20 @@ components:
           format: int64
         memberFullName:
           type: string
+        nationalId:
+          type: string
+        historicalRank:
+          type: string
+        weaponLicense:
+          type: string
+        email:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
 
     # --- ENTIDADES (DOMINIO BASE / INPUT JSON) ---
     Association:
@@ -1009,9 +1049,6 @@ components:
           type: string
           example: "AE-234234"
         birthDate:
-          type: string
-          format: date
-        enrollmentDate:
           type: string
           format: date
         imageUrl:

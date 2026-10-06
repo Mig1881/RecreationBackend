@@ -53,7 +53,7 @@ public class MemberService {
         existingMember.setHistoricalRank(memberDetails.getHistoricalRank());
         existingMember.setWeaponLicense(memberDetails.getWeaponLicense());
         existingMember.setBirthDate(memberDetails.getBirthDate());
-        existingMember.setEnrollmentDate(memberDetails.getEnrollmentDate());
+//        existingMember.setEnrollmentDate(memberDetails.getEnrollmentDate());
         existingMember.setEmail(memberDetails.getEmail());
         existingMember.setRole(memberDetails.getRole());
 

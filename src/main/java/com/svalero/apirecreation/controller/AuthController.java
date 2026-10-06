@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,7 +53,7 @@ public class AuthController {
         member.setPassword(encoder.encode(signUpDto.getPassword()));
         member.setPhone(signUpDto.getPhone());
         member.setBirthDate(signUpDto.getBirthDate());
-        member.setEnrollmentDate(LocalDate.now());
+//        member.setEnrollmentDate(LocalDate.now());
         member.setRole("MEMBER"); // Rol por defecto
 
         memberRepository.save(member);

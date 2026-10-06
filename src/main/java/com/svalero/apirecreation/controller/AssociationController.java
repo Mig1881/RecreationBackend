@@ -1,7 +1,9 @@
 package com.svalero.apirecreation.controller;
 
 import com.svalero.apirecreation.domain.Association;
+import com.svalero.apirecreation.domain.dto.MembershipOutDto;
 import com.svalero.apirecreation.service.AssociationService;
+import com.svalero.apirecreation.service.MembershipService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,9 @@ public class AssociationController {
     @Autowired
     private AssociationService associationService;
 
+    @Autowired
+    private MembershipService membershipService;
+
     // GET: /api/associations
     @GetMapping
     public ResponseEntity<List<Association>> getAllAssociations() {
@@ -30,6 +35,15 @@ public class AssociationController {
     public ResponseEntity<Association> getAssociationById(@PathVariable Long id) {
         Association association = associationService.findById(id);
         return new ResponseEntity<>(association, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/memberships")
+    public ResponseEntity<List<MembershipOutDto>> getAssociationMemberships(@PathVariable Long id) {
+        List<MembershipOutDto> troops = membershipService.getMembershipsByAssociationId(id);
+
+        log.info("Enviando {} expedientes para la asociación con ID: {}", troops.size(), id);
+
+        return new ResponseEntity<>(troops, HttpStatus.OK);
     }
 
     // POST: /api/associations
