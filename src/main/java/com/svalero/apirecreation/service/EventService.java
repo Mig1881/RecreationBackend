@@ -38,14 +38,14 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    // 3. ¡CRÍTICO!: Mantenemos este método devolviendo la Entidad 'Event'.
+    // 3. Mantenemos este método devolviendo la Entidad 'Event'.
     // Los servicios de Participaciones y Asistencias necesitan la Entidad real para guardar en BBDD.
     public Event findById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException("Evento no encontrado con ID: " + id));
     }
 
-    // 4. NUEVO: Método específico para que el Controlador pida un solo evento en formato DTO
+    // 4. Método específico para que el Controlador pida un solo evento en formato DTO
     public EventOutDto findDtoById(Long id) {
         Event event = findById(id);
         return mapToOutDto(event);
@@ -70,6 +70,13 @@ public class EventService {
     public EventOutDto update(Long id, Event eventDetails) {
         Event existingEvent = findById(id);
 
+        // 6.1. Validación de seguridad: No permitir cambiar el tipo de evento (De Público a Privado o viceversa)
+        if (existingEvent.getClass() != eventDetails.getClass()) {
+            throw new IllegalArgumentException("No se puede cambiar un evento de tipo "
+                    + existingEvent.getClass().getSimpleName() + " a " + eventDetails.getClass().getSimpleName());
+        }
+
+        // 6.2. Mapeo de la clase padre (Campos comunes)
         existingEvent.setEventCode(eventDetails.getEventCode());
         existingEvent.setCountry(eventDetails.getCountry());
         existingEvent.setCity(eventDetails.getCity());
@@ -80,10 +87,28 @@ public class EventService {
         existingEvent.setReenactorsCount(eventDetails.getReenactorsCount());
         existingEvent.setVisitorsCount(eventDetails.getVisitorsCount());
 
+        // 6.3. Mapeo de la Asociación Organizadora
         Long newAssociationId = eventDetails.getOrganizingAssociation().getId();
         if (!existingEvent.getOrganizingAssociation().getId().equals(newAssociationId)) {
             Association newAssociation = associationService.findById(newAssociationId);
             existingEvent.setOrganizingAssociation(newAssociation);
+        }
+
+        // Mapeo específico de las clases hijas 🔥
+        if (existingEvent instanceof PublicEvent && eventDetails instanceof PublicEvent) {
+            PublicEvent existingPublic = (PublicEvent) existingEvent;
+            PublicEvent incomingPublic = (PublicEvent) eventDetails;
+
+            existingPublic.setPublicEntity(incomingPublic.getPublicEntity());
+            existingPublic.setSubsidy(incomingPublic.getSubsidy());
+
+        } else if (existingEvent instanceof PrivateEvent && eventDetails instanceof PrivateEvent) {
+            PrivateEvent existingPrivate = (PrivateEvent) existingEvent;
+            PrivateEvent incomingPrivate = (PrivateEvent) eventDetails;
+
+            existingPrivate.setSponsor(incomingPrivate.getSponsor());
+            existingPrivate.setInitialBudget(incomingPrivate.getInitialBudget());
+            existingPrivate.setOpenToPublic(incomingPrivate.getOpenToPublic());
         }
 
         Event updatedEvent = eventRepository.save(existingEvent);
@@ -118,14 +143,14 @@ public class EventService {
         dto.setEndDate(event.getEndDate());
         dto.setPublished(event.getPublished());
 
-        // Extraer los IDs de las asociaciones invitadas (Lo que pedía el frontend)
+        // Extraer los IDs de las asociaciones invitadas
         List<Long> attendingIds = event.getAttendances() == null ? List.of() :
                 event.getAttendances().stream()
                         .map(attendance -> attendance.getAssociation().getId())
                         .collect(Collectors.toList());
         dto.setAttendingAssociationIds(attendingIds);
 
-        // Comprobación polimórfica para los campos específicos de herencia
+        // Comprobación polimórfica para los campos específicos de herencia en la salida
         if (event instanceof PublicEvent) {
             dto.setEventType("PUBLIC");
             dto.setPublicEntity(((PublicEvent) event).getPublicEntity());
