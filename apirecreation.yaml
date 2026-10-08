@@ -209,6 +209,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+
   /api/associations/{id}/memberships:
     get:
       tags:
@@ -236,6 +237,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+
   # ==========================================
   # MEMBERS
   # ==========================================
@@ -771,6 +773,25 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /api/memberships/{id}/licenciar:
+    put:
+      tags:
+        - memberships
+      summary: Licenciar miembro (Baja Lógica)
+      description: Endpoint semántico para aplicar el borrado lógico (soft delete) a una adscripción.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 
 components:
   securitySchemes:
@@ -949,6 +970,10 @@ components:
           type: string
         weaponModel:
           type: string
+        qrToken:
+          type: string
+          description: "Token único identificador para la acreditación QR del recreador"
+          example: "QR-5-12-a1b2c3d4"
 
     EventAttendanceOutDto:
       type: object
@@ -1014,6 +1039,9 @@ components:
         name:
           type: string
           example: "Voluntarios de Aragón"
+        city:
+          type: string
+          example: "Zaragoza"
         allegiance:
           type: string
           example: "Ejército Español"
