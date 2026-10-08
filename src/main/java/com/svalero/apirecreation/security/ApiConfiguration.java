@@ -67,7 +67,8 @@ public class ApiConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll() // Login y Registro públicos
+                        // AHORA SOLO EL LOGIN ES PÚBLICO
+                        auth.requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Para CORS (React)
                                 .anyRequest().authenticated() // Todo el resto de tu API está BLOQUEADO
                 );

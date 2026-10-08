@@ -29,7 +29,6 @@ public class MembershipService {
     @Autowired
     private MemberService memberService;
 
-    //Convertimos la lista de entidades a DTOs
     public List<MembershipOutDto> findAll() {
         return membershipRepository.findAll().stream()
                 .map(this::mapToOutDto)
@@ -42,14 +41,12 @@ public class MembershipService {
                 .collect(Collectors.toList());
     }
 
-    // Devuelve todos los miembros (con sus fechas) de una asociación concreta
     public List<MembershipOutDto> getMembershipsByAssociationId(Long associationId) {
         return membershipRepository.findByAssociationId(associationId).stream()
                 .map(this::mapToOutDto)
                 .collect(Collectors.toList());
     }
 
-    //Registramos y devolvemos el objeto plano
     public MembershipOutDto registerMembership(MembershipDTO dto) {
         if (membershipRepository.existsByAssociationIdAndMemberId(dto.getAssociationId(), dto.getMemberId())) {
             log.warn("Intento de vinculación duplicada: Asociación {} - Miembro {}", dto.getAssociationId(), dto.getMemberId());
@@ -63,7 +60,6 @@ public class MembershipService {
         membership.setAssociation(association);
         membership.setMember(member);
 
-        // Asignamos la fecha de alta automáticamente con la fecha de hoy
         membership.setStartDate(LocalDate.now());
 
         Membership savedMembership = membershipRepository.save(membership);
@@ -73,16 +69,28 @@ public class MembershipService {
         return mapToOutDto(savedMembership);
     }
 
-    // Borrado lógico controlado (Soft Delete)
-    public void delete(Long id) {
+    //SOFT DELETE (Baja lógica / Licenciar) 🔥
+    public void discharge(Long id) {
         Membership membership = membershipRepository.findById(id)
                 .orElseThrow(() -> new MembershipNotFoundException("Vinculación no encontrada con ID: " + id));
 
-        // En lugar de borrar de la BBDD (membershipRepository.delete), marcamos la fecha de baja
+        // Marcamos la fecha de baja
         membership.setEndDate(LocalDate.now());
 
         membershipRepository.save(membership);
-        log.info("Baja lógica aplicada (Licenciado) a la vinculación con ID: {} en fecha {}", id, membership.getEndDate());
+        log.info("Baja lógica aplicada (Discharged) a la vinculación con ID: {} en fecha {}", id, membership.getEndDate());
+    }
+
+    // REACTIVATE (Alta de un veterano en reserva) 🔥
+    public void reactivate(Long id) {
+        Membership membership = membershipRepository.findById(id)
+                .orElseThrow(() -> new MembershipNotFoundException("Vinculación no encontrada con ID: " + id));
+
+        // Borramos la fecha de fin para que vuelva al servicio activo
+        membership.setEndDate(null);
+
+        membershipRepository.save(membership);
+        log.info("Recreador llamado a filas de nuevo. Adscripción ID: {} reactivada.", id);
     }
 
     // --- MÉTODO PRIVADO DE MAPEO ---
@@ -94,7 +102,6 @@ public class MembershipService {
                 membership.getMember().getId(),
                 membership.getMember().getFirstName() + " " + membership.getMember().getLastName(),
 
-                // Extraemos los campos extra del Member asociado
                 membership.getMember().getNationalId(),
                 membership.getMember().getHistoricalRank(),
                 membership.getMember().getWeaponLicense(),
