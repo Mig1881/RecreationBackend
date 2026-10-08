@@ -30,9 +30,17 @@ public class MembershipController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMembership(@PathVariable Long id) {
-        membershipService.delete(id);
+    // 🔥 1. ENDPOINT PARA BAJA LÓGICA (Licenciar / Soft Delete) 🔥
+    @PutMapping("/{id}/discharge")
+    public ResponseEntity<Void> dischargeMembership(@PathVariable Long id) {
+        membershipService.discharge(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // 🔥 2. ENDPOINT PARA REACTIVAR (Vuelta al servicio activo) 🔥
+    @PutMapping("/{id}/reactivate")
+    public ResponseEntity<Void> reactivateMembership(@PathVariable Long id) {
+        membershipService.reactivate(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
