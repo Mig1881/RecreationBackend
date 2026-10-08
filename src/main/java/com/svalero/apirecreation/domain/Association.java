@@ -28,6 +28,9 @@ public class Association {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(length = 100)
+    private String city;
+
     @Column(length = 50)
     private String allegiance;
 

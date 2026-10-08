@@ -21,4 +21,5 @@ public class EventParticipationOutDto {
     // Datos propios de la participación
     private String carriedWeapon;
     private String weaponModel;
+    private String qrToken;
 }

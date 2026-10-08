@@ -40,6 +40,7 @@ public class AssociationService {
         existingAssociation.setTaxId(associationDetails.getTaxId());
         existingAssociation.setName(associationDetails.getName());
         existingAssociation.setFoundationYear(associationDetails.getFoundationYear());
+        existingAssociation.setCity(associationDetails.getCity());
         existingAssociation.setAllegiance(associationDetails.getAllegiance());
         existingAssociation.setHistoricalAttire(associationDetails.getHistoricalAttire());
         existingAssociation.setLogoBase64(associationDetails.getLogoBase64());

@@ -31,4 +31,8 @@ public class EventParticipation {
 
     @Column(name = "weapon_model", length = 100)
     private String weaponModel;
+
+    @Column(name = "qr_token", unique = true, length = 100)
+    private String qrToken;
+
 }

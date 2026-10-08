@@ -52,27 +52,30 @@ public class EventParticipationService {
     //Inscribimos y devolvemos solo la información limpia (DTO)
     public EventParticipationOutDto enrollMember(EventParticipationDTO dto) {
 
-        // Validar que no esté inscrito ya
         if (participationRepository.existsByEventIdAndMemberId(dto.getEventId(), dto.getMemberId())) {
             log.warn("Intento de inscripción duplicada: Evento {} - Miembro {}", dto.getEventId(), dto.getMemberId());
             throw new DuplicateEnrollmentException("El miembro ya está inscrito en este evento.");
         }
 
-        // Buscar las entidades reales en la base de datos
         Event event = eventService.findById(dto.getEventId());
         Member member = memberService.findById(dto.getMemberId());
 
-        // Crear la inscripción limpia, enlazarlas y guardar
         EventParticipation participation = new EventParticipation();
         participation.setEvent(event);
         participation.setMember(member);
         participation.setCarriedWeapon(dto.getCarriedWeapon());
         participation.setWeaponModel(dto.getWeaponModel());
 
-        EventParticipation savedParticipation = participationRepository.save(participation);
-        log.info("Nueva inscripción registrada: Miembro {} en Evento {}", member.getId(), event.getEventCode());
+        // GENERACIÓN DEL TOKEN ÚNICO PARA EL QR
+        // Formato: QR-{idEvento}-{idMiembro}-{UUIDaleatorio}
+        // Ejemplo: QR-5-12-a1b2c3d4
+        String uniqueToken = "QR-" + event.getId() + "-" + member.getId() + "-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        participation.setQrToken(uniqueToken);
 
-        // Mapear la entidad guardada al DTO de salida
+        EventParticipation savedParticipation = participationRepository.save(participation);
+        log.info("Nueva inscripción registrada: Miembro {} en Evento {}. QR Generado: {}",
+                member.getId(), event.getEventCode(), savedParticipation.getQrToken());
+
         return mapToOutDto(savedParticipation);
     }
 
@@ -95,7 +98,8 @@ public class EventParticipationService {
                 participation.getMember().getId(),
                 participation.getMember().getFirstName() + " " + participation.getMember().getLastName(),
                 participation.getCarriedWeapon(),
-                participation.getWeaponModel()
+                participation.getWeaponModel(),
+                participation.getQrToken()
         );
     }
 }
