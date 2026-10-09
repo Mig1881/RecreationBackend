@@ -3,6 +3,7 @@ package com.svalero.apirecreation.controller;
 import com.svalero.apirecreation.domain.dto.MembershipDTO;
 import com.svalero.apirecreation.domain.dto.MembershipOutDto;
 import com.svalero.apirecreation.service.MembershipService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,19 +26,17 @@ public class MembershipController {
     }
 
     @PostMapping
-    public ResponseEntity<MembershipOutDto> createMembership(@RequestBody MembershipDTO dto) {
+    public ResponseEntity<MembershipOutDto> createMembership(@Valid @RequestBody MembershipDTO dto) {
         MembershipOutDto created = membershipService.registerMembership(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    // 🔥 1. ENDPOINT PARA BAJA LÓGICA (Licenciar / Soft Delete) 🔥
     @PutMapping("/{id}/discharge")
     public ResponseEntity<Void> dischargeMembership(@PathVariable Long id) {
         membershipService.discharge(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // 🔥 2. ENDPOINT PARA REACTIVAR (Vuelta al servicio activo) 🔥
     @PutMapping("/{id}/reactivate")
     public ResponseEntity<Void> reactivateMembership(@PathVariable Long id) {
         membershipService.reactivate(id);

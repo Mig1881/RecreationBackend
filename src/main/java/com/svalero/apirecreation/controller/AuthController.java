@@ -5,6 +5,7 @@ import com.svalero.apirecreation.domain.dto.JwtResponse;
 import com.svalero.apirecreation.domain.dto.LoginDto;
 import com.svalero.apirecreation.repository.MemberRepository;
 import com.svalero.apirecreation.security.JwtUtils;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,12 +32,11 @@ public class AuthController {
     @Autowired
     private MemberRepository memberRepository;
 
-
     @Autowired
     private JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginDto loginDto) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
