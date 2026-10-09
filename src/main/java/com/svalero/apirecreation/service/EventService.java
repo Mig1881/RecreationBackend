@@ -45,7 +45,7 @@ public class EventService {
                 .orElseThrow(() -> new EventNotFoundException("Evento no encontrado con ID: " + id));
     }
 
-    // 4. Método específico para que el Controlador pida un solo evento en formato DTO
+    // 4.Método específico para que el Controlador pida un solo evento en formato DTO
     public EventOutDto findDtoById(Long id) {
         Event event = findById(id);
         return mapToOutDto(event);
@@ -94,7 +94,7 @@ public class EventService {
             existingEvent.setOrganizingAssociation(newAssociation);
         }
 
-        // Mapeo específico de las clases hijas 🔥
+        // 6.4. Mapeo específico de las clases hijas
         if (existingEvent instanceof PublicEvent && eventDetails instanceof PublicEvent) {
             PublicEvent existingPublic = (PublicEvent) existingEvent;
             PublicEvent incomingPublic = (PublicEvent) eventDetails;

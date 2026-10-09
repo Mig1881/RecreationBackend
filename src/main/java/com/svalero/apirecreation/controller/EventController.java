@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -69,18 +71,23 @@ public class EventController {
     @GetMapping("/{eventId}/export-participants")
     public void exportParticipantsCSV(@PathVariable Long eventId, HttpServletResponse response) throws IOException {
 
-        // 1. Configurar la respuesta HTTP para que sea un archivo descargable
+        // 🔥 1. Obtenemos los datos del usuario logueado desde el token de Spring Security
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        // 2. Configurar la respuesta HTTP para que sea un archivo descargable
         response.setContentType("text/csv; charset=utf-8");
 
-        // 2. Generar un nombre de archivo dinámico
+        // 3. Generar un nombre de archivo dinámico
         String filename = "tiradores_evento_" + eventId + "_" + LocalDate.now() + ".csv";
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         // BOM para asegurar que Excel reconozca las tildes y caracteres UTF-8 correctamente
         response.getWriter().write('\ufeff');
 
-        // 3. Ejecutar el motor de exportación
-        csvExportService.exportEventParticipantsToCsv(eventId, response.getWriter());
+        // 🔥 4. Ejecutar el motor de exportación pasando los 4 parámetros obligatorios
+        csvExportService.exportEventParticipantsToCsv(eventId, response.getWriter(), userEmail, isAdmin);
     }
 }
-
