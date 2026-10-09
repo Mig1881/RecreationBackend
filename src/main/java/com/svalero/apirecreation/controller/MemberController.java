@@ -1,9 +1,11 @@
 package com.svalero.apirecreation.controller;
 
 import com.svalero.apirecreation.domain.Member;
+import com.svalero.apirecreation.domain.dto.MemberDTO;
 import com.svalero.apirecreation.domain.dto.MembershipOutDto;
 import com.svalero.apirecreation.service.MemberService;
 import com.svalero.apirecreation.service.MembershipService;
+import jakarta.validation.Valid; // 🔥 IMPORTANTE
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,54 +25,44 @@ public class MemberController {
     @Autowired
     private MembershipService membershipService;
 
-    // GET: /api/members
     @GetMapping
     public ResponseEntity<List<Member>> getAllMembers() {
         List<Member> members = memberService.findAll();
         return new ResponseEntity<>(members, HttpStatus.OK);
     }
 
-    // GET: /api/members/{id}
     @GetMapping("/{id}")
     public ResponseEntity<Member> getMemberById(@PathVariable Long id) {
         Member member = memberService.findById(id);
         return new ResponseEntity<>(member, HttpStatus.OK);
     }
 
-    // POST: /api/members
+    // 🔥 Usamos @Valid y MemberDTO
     @PostMapping
-    public ResponseEntity<Member> createMember(@RequestBody Member member) {
-        Member createdMember = memberService.save(member);
+    public ResponseEntity<Member> createMember(@Valid @RequestBody MemberDTO dto) {
+        Member createdMember = memberService.save(dto);
         return new ResponseEntity<>(createdMember, HttpStatus.CREATED);
     }
 
-    // PUT: /api/members/{id}
+    // 🔥 Usamos @Valid y MemberDTO
     @PutMapping("/{id}")
-    public ResponseEntity<Member> updateMember(@PathVariable Long id, @RequestBody Member member) {
-        Member updatedMember = memberService.update(id, member);
+    public ResponseEntity<Member> updateMember(@PathVariable Long id, @Valid @RequestBody MemberDTO dto) {
+        Member updatedMember = memberService.update(id, dto);
         return new ResponseEntity<>(updatedMember, HttpStatus.OK);
     }
 
-    // DELETE: /api/members/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @GetMapping("/me/memberships")
     public ResponseEntity<List<MembershipOutDto>> getMyMemberships(org.springframework.security.core.Authentication authentication) {
-
-        // 1. Extraemos el email del usuario logueado directamente del token JWT
         String email = authentication.getName();
-
-        // 2. Buscamos al miembro en la base de datos
         Member currentMember = memberService.findByEmail(email);
-
-        // 3. Obtenemos todas sus asociaciones usando el servicio que creamos antes
         List<MembershipOutDto> myMemberships = membershipService.getMembershipsByMemberId(currentMember.getId());
-
         log.info("Enviando {} asociaciones al frontend para el usuario {}", myMemberships.size(), email);
-
         return new ResponseEntity<>(myMemberships, HttpStatus.OK);
     }
 }

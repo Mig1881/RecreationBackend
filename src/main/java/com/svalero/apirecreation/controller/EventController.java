@@ -1,10 +1,11 @@
 package com.svalero.apirecreation.controller;
 
-import com.svalero.apirecreation.domain.Event;
+import com.svalero.apirecreation.domain.dto.EventDTO;
 import com.svalero.apirecreation.domain.dto.EventOutDto;
 import com.svalero.apirecreation.service.CsvExportService;
 import com.svalero.apirecreation.service.EventService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,27 +37,25 @@ public class EventController {
 
     @GetMapping("/published")
     public ResponseEntity<List<EventOutDto>> getPublishedEvents() {
-        // Este endpoint es muy útil para que los Members vean solo los eventos confirmados
         return new ResponseEntity<>(eventService.findPublishedEvents(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EventOutDto> getEventById(@PathVariable Long id) {
-        //Llamamos al nuevo método específico que nos devuelve el DTO y no la entidad
         return new ResponseEntity<>(eventService.findDtoById(id), HttpStatus.OK);
     }
 
+    //Protegido con @Valid y EventDTO
     @PostMapping
-    public ResponseEntity<EventOutDto> createEvent(@RequestBody Event event) {
-        // Jackson lee el JSON, crea la clase correcta (Public/Private), la guardamos
-        // y el servicio nos devuelve la versión plana y segura (EventOutDto)
-        EventOutDto createdEvent = eventService.save(event);
+    public ResponseEntity<EventOutDto> createEvent(@Valid @RequestBody EventDTO dto) {
+        EventOutDto createdEvent = eventService.save(dto);
         return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
     }
 
+    //Protegido con @Valid y EventDTO
     @PutMapping("/{id}")
-    public ResponseEntity<EventOutDto> updateEvent(@PathVariable Long id, @RequestBody Event event) {
-        EventOutDto updatedEvent = eventService.update(id, event);
+    public ResponseEntity<EventOutDto> updateEvent(@PathVariable Long id, @Valid @RequestBody EventDTO dto) {
+        EventOutDto updatedEvent = eventService.update(id, dto);
         return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
     }
 
@@ -66,28 +65,22 @@ public class EventController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // MAGIA DE SEGURIDAD: Solo usuarios con estos roles pueden ejecutar el método
     @PreAuthorize("hasAnyRole('ADMIN', 'PRESIDENT')")
     @GetMapping("/{eventId}/export-participants")
     public void exportParticipantsCSV(@PathVariable Long eventId, HttpServletResponse response) throws IOException {
 
-        // 🔥 1. Obtenemos los datos del usuario logueado desde el token de Spring Security
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        // 2. Configurar la respuesta HTTP para que sea un archivo descargable
         response.setContentType("text/csv; charset=utf-8");
 
-        // 3. Generar un nombre de archivo dinámico
         String filename = "tiradores_evento_" + eventId + "_" + LocalDate.now() + ".csv";
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
-        // BOM para asegurar que Excel reconozca las tildes y caracteres UTF-8 correctamente
         response.getWriter().write('\ufeff');
 
-        // 🔥 4. Ejecutar el motor de exportación pasando los 4 parámetros obligatorios
         csvExportService.exportEventParticipantsToCsv(eventId, response.getWriter(), userEmail, isAdmin);
     }
 }

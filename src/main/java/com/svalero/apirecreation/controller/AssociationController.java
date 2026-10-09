@@ -1,9 +1,11 @@
 package com.svalero.apirecreation.controller;
 
 import com.svalero.apirecreation.domain.Association;
+import com.svalero.apirecreation.domain.dto.AssociationDTO;
 import com.svalero.apirecreation.domain.dto.MembershipOutDto;
 import com.svalero.apirecreation.service.AssociationService;
 import com.svalero.apirecreation.service.MembershipService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,14 +25,12 @@ public class AssociationController {
     @Autowired
     private MembershipService membershipService;
 
-    // GET: /api/associations
     @GetMapping
     public ResponseEntity<List<Association>> getAllAssociations() {
         List<Association> associations = associationService.findAll();
         return new ResponseEntity<>(associations, HttpStatus.OK);
     }
 
-    // GET: /api/associations/{id}
     @GetMapping("/{id}")
     public ResponseEntity<Association> getAssociationById(@PathVariable Long id) {
         Association association = associationService.findById(id);
@@ -40,27 +40,24 @@ public class AssociationController {
     @GetMapping("/{id}/memberships")
     public ResponseEntity<List<MembershipOutDto>> getAssociationMemberships(@PathVariable Long id) {
         List<MembershipOutDto> troops = membershipService.getMembershipsByAssociationId(id);
-
         log.info("Enviando {} expedientes para la asociación con ID: {}", troops.size(), id);
-
         return new ResponseEntity<>(troops, HttpStatus.OK);
     }
 
-    // POST: /api/associations
+    // 🔥 Usamos @Valid y AssociationDTO
     @PostMapping
-    public ResponseEntity<Association> createAssociation(@RequestBody Association association) {
-        Association createdAssociation = associationService.save(association);
+    public ResponseEntity<Association> createAssociation(@Valid @RequestBody AssociationDTO dto) {
+        Association createdAssociation = associationService.save(dto);
         return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
     }
 
-    // PUT: /api/associations/{id}
+    // 🔥 Usamos @Valid y AssociationDTO
     @PutMapping("/{id}")
-    public ResponseEntity<Association> updateAssociation(@PathVariable Long id, @RequestBody Association association) {
-        Association updatedAssociation = associationService.update(id, association);
+    public ResponseEntity<Association> updateAssociation(@PathVariable Long id, @Valid @RequestBody AssociationDTO dto) {
+        Association updatedAssociation = associationService.update(id, dto);
         return new ResponseEntity<>(updatedAssociation, HttpStatus.OK);
     }
 
-    // DELETE: /api/associations/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAssociation(@PathVariable Long id) {
         associationService.delete(id);

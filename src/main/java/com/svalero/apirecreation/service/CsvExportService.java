@@ -26,7 +26,7 @@ public class CsvExportService {
     @Autowired
     private EventRepository eventRepository;
 
-    // Inyecto los repositorios necesarios para validar la seguridad
+    // 🔥 Inyectamos los repositorios necesarios para validar la seguridad
     @Autowired
     private MemberRepository memberRepository;
 

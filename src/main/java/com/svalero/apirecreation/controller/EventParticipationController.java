@@ -3,6 +3,7 @@ package com.svalero.apirecreation.controller;
 import com.svalero.apirecreation.domain.dto.EventParticipationDTO;
 import com.svalero.apirecreation.domain.dto.EventParticipationOutDto;
 import com.svalero.apirecreation.service.EventParticipationService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class EventParticipationController {
     }
 
     @PostMapping
-    public ResponseEntity<EventParticipationOutDto> createParticipation(@RequestBody EventParticipationDTO participationDTO) {
+    public ResponseEntity<EventParticipationOutDto> createParticipation(@Valid @RequestBody EventParticipationDTO participationDTO) {
         EventParticipationOutDto createdParticipation = participationService.enrollMember(participationDTO);
 
         log.info("Inscripción devuelta al cliente correctamente para el evento ID: {}", participationDTO.getEventId());

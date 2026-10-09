@@ -3,6 +3,7 @@ package com.svalero.apirecreation.controller;
 import com.svalero.apirecreation.domain.dto.EventAttendanceDTO;
 import com.svalero.apirecreation.domain.dto.EventAttendanceOutDto;
 import com.svalero.apirecreation.service.EventAttendanceService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class EventAttendanceController {
     }
 
     @PostMapping
-    public ResponseEntity<EventAttendanceOutDto> createAttendance(@RequestBody EventAttendanceDTO dto) {
+    public ResponseEntity<EventAttendanceOutDto> createAttendance(@Valid @RequestBody EventAttendanceDTO dto) {
         EventAttendanceOutDto created = attendanceService.registerAttendance(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
