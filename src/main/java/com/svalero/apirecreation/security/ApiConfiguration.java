@@ -46,10 +46,7 @@ public class ApiConfiguration {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // Ahora el framework exige inyectar el UserDetailsService directamente en el paréntesis
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-
-        // El encriptador de contraseñas no ha cambiado y se sigue inyectando igual
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
@@ -67,10 +64,10 @@ public class ApiConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        // AHORA SOLO EL LOGIN ES PÚBLICO
+                        // SOLO EL LOGIN ES PÚBLICO
                         auth.requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Para CORS (React)
-                                .anyRequest().authenticated() // Todo el resto de tu API está BLOQUEADO
+                                .anyRequest().authenticated() // Todo el resto de la API está BLOQUEADO
                 );
 
         http.authenticationProvider(authenticationProvider());
