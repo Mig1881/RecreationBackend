@@ -1,0 +1,1323 @@
+{
+  "info": {
+    "_postman_id": "15d1720e-e4d6-43b4-9255-98a35b222a24",
+    "name": "recreation_newman",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49190331",
+    "_collection_link": "https://go.postman.co/collection/49190331-15d1720e-e4d6-43b4-9255-98a35b222a24?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Convertimos la respuesta del servidor en un objeto JSON que podamos leer\r",
+              "var jsonData = pm.response.json();\r",
+              "\r",
+              "// 2. Si la respuesta trae un token, lo guardamos en una variable de entorno llamada \"jwt_token\"\r",
+              "if (jsonData.token) {\r",
+              "    pm.environment.set(\"jwt_token2\", jsonData.token);\r",
+              "    console.log(\"¡Token guardado correctamente!\");\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"admin@ane.es\",\r\n  \"password\": \"admin123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/auth/login",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Associations",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('taxId');\r",
+              "  pm.expect(responseJson).to.have.property('foundationYear');\r",
+              "  pm.expect(responseJson).to.have.property('name');\r",
+              "  pm.expect(responseJson).to.have.property('city');\r",
+              "  pm.expect(responseJson).to.have.property('allegiance');\r",
+              "  pm.expect(responseJson).to.have.property('historicalAttire');\r",
+              "  pm.expect(responseJson).to.have.property('logoBase64');\r",
+              "  \r",
+              "  pm.collectionVariables.set(\"associationId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.taxId).to.be.a('string');\r",
+              "  pm.expect(responseJson.foundationYear).to.be.a('number');\r",
+              "  pm.expect(responseJson.name).to.be.a('string');\r",
+              "  pm.expect(responseJson.city).to.be.a('string');\r",
+              "  pm.expect(responseJson.allegiance).to.be.a('string');\r",
+              "  pm.expect(responseJson.historicalAttire).to.be.a('string');\r",
+              "  pm.expect(responseJson.logoBase64).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"taxId\": \"G12345678\",\n  \"foundationYear\": 2005,\n  \"name\": \"Regimiento de Infantería de Línea de Zaragoza\",\n  \"city\": \"Zaragoza\",\n  \"allegiance\": \"España\",\n  \"historicalAttire\": \"Uniforme blanco con divisas rojas\",\n  \"logoBase64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAE...\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/associations",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "associations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Associations/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('taxId');\r",
+              "  pm.expect(responseJson).to.have.property('foundationYear');\r",
+              "  pm.expect(responseJson).to.have.property('name');\r",
+              "  pm.expect(responseJson).to.have.property('city');\r",
+              "  pm.expect(responseJson).to.have.property('allegiance');\r",
+              "  pm.expect(responseJson).to.have.property('historicalAttire');\r",
+              "  pm.expect(responseJson).to.have.property('logoBase64');\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.taxId).to.be.a('string');\r",
+              "  pm.expect(responseJson.foundationYear).to.be.a('number');\r",
+              "  pm.expect(responseJson.name).to.be.a('string');\r",
+              "  pm.expect(responseJson.city).to.be.a('string');\r",
+              "  pm.expect(responseJson.allegiance).to.be.a('string');\r",
+              "  pm.expect(responseJson.historicalAttire).to.be.a('string');\r",
+              "  pm.expect(responseJson.logoBase64).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/associations/{{associationId}}",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "associations",
+            "{{associationId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Associations/{id} 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 404\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(404);\r",
+              "});\r",
+              "pm.test(\"error message is ok\", () => {\r",
+              "    const responseJson = pm.response.json();\r",
+              "    pm.expect(responseJson.error).to.eql('Not Found');\r",
+              "    pm.expect(responseJson.message).to.eql('Asociación no encontrada con ID: 999');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/associations/999",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "associations",
+            "999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Associatons",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"response has one item\", function () {\r",
+              "    pm.expect(pm.response.json().length).to.eql(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/associations",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "associations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Members",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('nationalId');\r",
+              "  pm.expect(responseJson).to.have.property('lastName');\r",
+              "  pm.expect(responseJson).to.have.property('firstName');\r",
+              "  pm.expect(responseJson).to.have.property('phone');\r",
+              "  pm.expect(responseJson).to.have.property('associationPosition');\r",
+              "  pm.expect(responseJson).to.have.property('historicalRank');\r",
+              "  pm.expect(responseJson).to.have.property('weaponLicense');\r",
+              "  pm.expect(responseJson).to.have.property('birthDate');\r",
+              "  pm.expect(responseJson).to.have.property('imageUrl');\r",
+              "  pm.expect(responseJson).to.have.property('email');\r",
+              "  pm.expect(responseJson).to.have.property('password');\r",
+              "  pm.expect(responseJson).to.have.property('role');\r",
+              "\r",
+              "  pm.collectionVariables.set(\"memberId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.nationalId).to.be.a('string');\r",
+              "  pm.expect(responseJson.lastName).to.be.a('string');\r",
+              "  pm.expect(responseJson.firstName).to.be.a('string');\r",
+              "  pm.expect(responseJson.phone).to.be.a('string');\r",
+              "  pm.expect(responseJson.associationPosition).to.be.a('string');\r",
+              "  pm.expect(responseJson.historicalRank).to.be.a('string');\r",
+              "  pm.expect(responseJson.weaponLicense).to.be.a('string');\r",
+              "  pm.expect(responseJson.birthDate).to.be.a('string');\r",
+              "  pm.expect(responseJson.email).to.be.a('string');\r",
+              "  pm.expect(responseJson.password).to.be.a('string');\r",
+              "  pm.expect(responseJson.role).to.be.a('string');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nationalId\": \"25345678Z\",\n  \"lastName\": \"García Pérez\",\n  \"firstName\": \"Carlos\",\n  \"phone\": \"+34600123456\",\n  \"associationPosition\": \"Presidente y Tesorero\",\n  \"historicalRank\": \"Capitan\",\n  \"weaponLicense\": \"AE-98765\",\n  \"birthDate\": \"1985-05-15\",\n  \"enrollmentDate\": \"2020-09-01\",\n  \"email\": \"carlosgarcia@ane.es\",\n  \"password\": \"carlosgarcia123\",\n  \"role\": \"ROLE_PRESIDENT\"\n}\n  ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/members",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "members"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Members/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('nationalId');\r",
+              "  pm.expect(responseJson).to.have.property('lastName');\r",
+              "  pm.expect(responseJson).to.have.property('firstName');\r",
+              "  pm.expect(responseJson).to.have.property('phone');\r",
+              "  pm.expect(responseJson).to.have.property('associationPosition');\r",
+              "  pm.expect(responseJson).to.have.property('historicalRank');\r",
+              "  pm.expect(responseJson).to.have.property('weaponLicense');\r",
+              "  pm.expect(responseJson).to.have.property('birthDate');\r",
+              "  pm.expect(responseJson).to.have.property('imageUrl');\r",
+              "  pm.expect(responseJson).to.have.property('email');\r",
+              "  pm.expect(responseJson).to.have.property('password');\r",
+              "  pm.expect(responseJson).to.have.property('role');\r",
+              "\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.nationalId).to.be.a('string');\r",
+              "  pm.expect(responseJson.lastName).to.be.a('string');\r",
+              "  pm.expect(responseJson.firstName).to.be.a('string');\r",
+              "  pm.expect(responseJson.phone).to.be.a('string');\r",
+              "  pm.expect(responseJson.associationPosition).to.be.a('string');\r",
+              "  pm.expect(responseJson.historicalRank).to.be.a('string');\r",
+              "  pm.expect(responseJson.weaponLicense).to.be.a('string');\r",
+              "  pm.expect(responseJson.birthDate).to.be.a('string');\r",
+              "  pm.expect(responseJson.email).to.be.a('string');\r",
+              "  pm.expect(responseJson.password).to.be.a('string');\r",
+              "  pm.expect(responseJson.role).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/members/{{memberId}}",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "members",
+            "{{memberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Members/{id} 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 404\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(404);\r",
+              "});\r",
+              "pm.test(\"error message is ok\", () => {\r",
+              "    const responseJson = pm.response.json();\r",
+              "    pm.expect(responseJson.error).to.eql('Not Found');\r",
+              "    pm.expect(responseJson.message).to.eql('Miembro no encontrado con ID: 999');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/members/999",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "members",
+            "999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Members",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"response has one item\", function () {\r",
+              "    pm.expect(pm.response.json().length).to.eql(2);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/members",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "members"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Memberships",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('associationId');\r",
+              "  pm.expect(responseJson).to.have.property('associationName');\r",
+              "  pm.expect(responseJson).to.have.property('memberId');\r",
+              "  pm.expect(responseJson).to.have.property('memberFullName');\r",
+              "  pm.expect(responseJson).to.have.property('nationalId');\r",
+              "  pm.expect(responseJson).to.have.property('historicalRank');\r",
+              "  pm.expect(responseJson).to.have.property('weaponLicense');\r",
+              "  pm.expect(responseJson).to.have.property('email');\r",
+              "  pm.expect(responseJson).to.have.property('startDate');\r",
+              "  pm.expect(responseJson).to.have.property('endDate');\r",
+              "\r",
+              "  pm.collectionVariables.set(\"membershipId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.associationId).to.be.a('number');\r",
+              "  pm.expect(responseJson.associationName).to.be.a('string');\r",
+              "  pm.expect(responseJson.memberId).to.be.a('number');\r",
+              "  pm.expect(responseJson.memberFullName).to.be.a('string');\r",
+              "  pm.expect(responseJson.nationalId).to.be.a('string');\r",
+              "  pm.expect(responseJson.historicalRank).to.be.a('string');\r",
+              "  pm.expect(responseJson.weaponLicense).to.be.a('string');\r",
+              "  pm.expect(responseJson.email).to.be.a('string');\r",
+              "  pm.expect(responseJson.startDate).to.be.a('string');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"associationId\": 1,\r\n  \"memberId\": 2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/memberships",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "memberships"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Memberships",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 204\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(204);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"associationId\": 1,\r\n  \"memberId\": 2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/memberships/{{membershipId}}/discharge",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "memberships",
+            "{{membershipId}}",
+            "discharge"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Memberships",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"response has one item\", function () {\r",
+              "    pm.expect(pm.response.json().length).to.eql(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"associationId\": 1,\n  \"memberId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/memberships",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "memberships"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Memberships",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 204\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(204);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"associationId\": 1,\r\n  \"memberId\": 2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/memberships/{{membershipId}}/reactivate",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "memberships",
+            "{{membershipId}}",
+            "reactivate"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Events",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('eventType');\r",
+              "  pm.expect(responseJson).to.have.property('eventCode');\r",
+              "  pm.expect(responseJson).to.have.property('organizingAssociationId');\r",
+              "  pm.expect(responseJson).to.have.property('organizingAssociationName');\r",
+              "  pm.expect(responseJson).to.have.property('country');\r",
+              "  pm.expect(responseJson).to.have.property('city');\r",
+              "  pm.expect(responseJson).to.have.property('startDate');\r",
+              "  pm.expect(responseJson).to.have.property('endDate');\r",
+              "  pm.expect(responseJson).to.have.property('publicEntity');\r",
+              "  pm.expect(responseJson).to.have.property('subsidy');\r",
+              "\r",
+              "  pm.collectionVariables.set(\"eventsId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventType).to.be.a('string');\r",
+              "  pm.expect(responseJson.eventCode).to.be.a('string');\r",
+              "  pm.expect(responseJson.organizingAssociationId).to.be.a('number');\r",
+              "  pm.expect(responseJson.organizingAssociationName).to.be.a('string');\r",
+              "  pm.expect(responseJson.country).to.be.a('string');\r",
+              "  pm.expect(responseJson.city).to.be.a('string');\r",
+              "  pm.expect(responseJson.startDate).to.be.a('string');\r",
+              "  pm.expect(responseJson.endDate).to.be.a('string');\r",
+              "  pm.expect(responseJson.publicEntity).to.be.a('string');\r",
+              "  pm.expect(responseJson.subsidy).to.be.a('number');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventType\": \"PUBLIC\",\n  \"eventCode\": \"ZGZ2027N1\",\n  \"organizingAssociation\": {\n    \"id\": 1\n  },\n  \"country\": \"España\",\n  \"city\": \"Zaragoza\",\n  \"cost\": 150.50,\n  \"startDate\": \"2027-03-05\",\n  \"endDate\": \"2027-03-05\",\n  \"published\": false,\n  \"publicEntity\": \"Ayuntamiento de Zaragoza\",\n  \"subsidy\": 1000.00\n}\n  ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/events",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Events/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('eventType');\r",
+              "  pm.expect(responseJson).to.have.property('eventCode');\r",
+              "  pm.expect(responseJson).to.have.property('organizingAssociationId');\r",
+              "  pm.expect(responseJson).to.have.property('organizingAssociationName');\r",
+              "  pm.expect(responseJson).to.have.property('country');\r",
+              "  pm.expect(responseJson).to.have.property('city');\r",
+              "  pm.expect(responseJson).to.have.property('startDate');\r",
+              "  pm.expect(responseJson).to.have.property('endDate');\r",
+              "  pm.expect(responseJson).to.have.property('publicEntity');\r",
+              "  pm.expect(responseJson).to.have.property('subsidy');\r",
+              "\r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventType).to.be.a('string');\r",
+              "  pm.expect(responseJson.eventCode).to.be.a('string');\r",
+              "  pm.expect(responseJson.organizingAssociationId).to.be.a('number');\r",
+              "  pm.expect(responseJson.organizingAssociationName).to.be.a('string');\r",
+              "  pm.expect(responseJson.country).to.be.a('string');\r",
+              "  pm.expect(responseJson.city).to.be.a('string');\r",
+              "  pm.expect(responseJson.startDate).to.be.a('string');\r",
+              "  pm.expect(responseJson.endDate).to.be.a('string');\r",
+              "  pm.expect(responseJson.publicEntity).to.be.a('string');\r",
+              "  pm.expect(responseJson.subsidy).to.be.a('number');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/events/{{eventsId}}",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "events",
+            "{{eventsId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Events/{id} 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 404\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(404);\r",
+              "});\r",
+              "pm.test(\"error message is ok\", () => {\r",
+              "    const responseJson = pm.response.json();\r",
+              "    pm.expect(responseJson.error).to.eql('Not Found');\r",
+              "    pm.expect(responseJson.message).to.eql('Evento no encontrado con ID: 999');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/events/999",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "events",
+            "999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Events",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"response has one item\", function () {\r",
+              "    pm.expect(pm.response.json().length).to.eql(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/events",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Attendances",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('eventId');\r",
+              "  pm.expect(responseJson).to.have.property('eventCode');\r",
+              "  pm.expect(responseJson).to.have.property('associationId');\r",
+              "  pm.expect(responseJson).to.have.property('associationName');\r",
+              "\r",
+              "  pm.collectionVariables.set(\"attendanceId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventId).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventCode).to.be.a('string');\r",
+              "  pm.expect(responseJson.associationId).to.be.a('number');\r",
+              "  pm.expect(responseJson.associationName).to.be.a('string');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"associationId\": 1,\n  \"eventId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/attendances",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "attendances"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Attendances/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\r",
+              "    pm.response.to.have.status(204);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/attendances/{{attendanceId}}",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "attendances",
+            "{{attendanceId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Attendances/{id} 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "pm.test(\"error message is ok\", () => {\r",
+              "    const responseJson = pm.response.json();\r",
+              "    pm.expect(responseJson.error).to.eql('Not Found');\r",
+              "    pm.expect(responseJson.message).to.eql('Asistencia no encontrada con ID: 1');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/attendances/{{attendanceId}}",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "attendances",
+            "{{attendanceId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Attendances",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('eventId');\r",
+              "  pm.expect(responseJson).to.have.property('eventCode');\r",
+              "  pm.expect(responseJson).to.have.property('associationId');\r",
+              "  pm.expect(responseJson).to.have.property('associationName');\r",
+              "\r",
+              "  pm.collectionVariables.set(\"attendanceId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventId).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventCode).to.be.a('string');\r",
+              "  pm.expect(responseJson.associationId).to.be.a('number');\r",
+              "  pm.expect(responseJson.associationName).to.be.a('string');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"associationId\": 1,\n  \"eventId\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/attendances",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "attendances"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Attendances",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"response has one item\", function () {\r",
+              "    pm.expect(pm.response.json().length).to.eql(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/attendances",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "attendances"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Participations",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 201\", () => {\r",
+              "  pm.expect(pm.response.code).to.eql(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"response structure is ok\", () => {\r",
+              "  const responseJson = pm.response.json();\r",
+              "  pm.expect(responseJson).to.have.property('eventId');\r",
+              "  pm.expect(responseJson).to.have.property('eventCode');\r",
+              "  pm.expect(responseJson).to.have.property('memberId');\r",
+              "  pm.expect(responseJson).to.have.property('memberFullName');\r",
+              "  pm.expect(responseJson).to.have.property('carriedWeapon');\r",
+              "  pm.expect(responseJson).to.have.property('weaponModel');\r",
+              "  pm.expect(responseJson).to.have.property('qrToken');\r",
+              "\r",
+              "  pm.collectionVariables.set(\"participationId\", responseJson.id);\r",
+              "  \r",
+              "  pm.expect(responseJson.id).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventId).to.be.a('number');\r",
+              "  pm.expect(responseJson.eventCode).to.be.a('string');\r",
+              "  pm.expect(responseJson.memberId).to.be.a('number');\r",
+              "  pm.expect(responseJson.memberFullName).to.be.a('string');\r",
+              "  pm.expect(responseJson.carriedWeapon).to.be.a('string');\r",
+              "  pm.expect(responseJson.weaponModel).to.be.a('string');\r",
+              "  pm.expect(responseJson.qrToken).to.be.a('string');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventId\": 1,\n  \"memberId\": 2,\n  \"carriedWeapon\": \"Mosquete Charleville\",\n  \"weaponModel\": \"Modelo 1777\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/participations",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "participations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Participations",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"response has one item\", function () {\r",
+              "    pm.expect(pm.response.json().length).to.eql(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{HOST}}/api/participations",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "participations"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ExportParticipants",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{HOST}}/api/events/{{eventsId}}/export-participants",
+          "host": [
+            "{{HOST}}"
+          ],
+          "path": [
+            "api",
+            "events",
+            "{{eventsId}}",
+            "export-participants"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token2}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "associationId",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    },
+    {
+      "key": "membershipId",
+      "value": ""
+    },
+    {
+      "key": "eventsId",
+      "value": ""
+    },
+    {
+      "key": "attendanceId",
+      "value": ""
+    },
+    {
+      "key": "participationId",
+      "value": ""
+    }
+  ]
+}
