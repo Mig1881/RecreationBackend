@@ -3,22 +3,25 @@ package com.svalero.apirecreation.config;
 import com.svalero.apirecreation.domain.Member;
 import com.svalero.apirecreation.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value; // 🔥 IMPORTANTE
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import java.time.LocalDate;
 
 @Slf4j
 @Configuration
-@Profile("dev")
+//corre siempre, pero con seguridad inyectada
 public class DatabaseSeeder {
+
+    // Lee la contraseña del entorno. Si se esta en local, usa esta por defecto.
+    @Value("${admin.initial.password:$2a$12$w1iLeTC7qYYnnPAX3wKOsurEowxiYh2rCaFUSDS5.lpcozHALEqwK}")
+    private String adminPasswordHashed;
 
     @Bean
     public CommandLineRunner initDatabase(MemberRepository memberRepository) {
         return args -> {
-            // Buscamos si el admin ya existe para no duplicarlo al reiniciar el docker-compose
             if (memberRepository.findByEmail("admin@ane.es").isEmpty()) {
                 log.info("Sembrando base de datos: Creando cuenta de Administrador (Mando Central)...");
 
@@ -33,14 +36,12 @@ public class DatabaseSeeder {
                 admin.setBirthDate(LocalDate.of(1980, 1, 1));
                 admin.setEmail("admin@ane.es");
 
-                // Contraseña "admin123" ya encriptada con BCrypt
-                admin.setPassword("$2a$12$w1iLeTC7qYYnnPAX3wKOsurEowxiYh2rCaFUSDS5.lpcozHALEqwK");
-                admin.setRole("ADMIN");
+                // Asignamos la contraseña inyectada
+                admin.setPassword(adminPasswordHashed);
+                admin.setRole("ROLE_ADMIN");
 
                 memberRepository.save(admin);
-                log.info("¡Administrador creado con éxito! Ya puedes loguearte en React.");
-            } else {
-                log.info("La cuenta de Administrador ya existe. Omitiendo inicialización.");
+                log.info("¡Administrador creado con éxito!");
             }
         };
     }
