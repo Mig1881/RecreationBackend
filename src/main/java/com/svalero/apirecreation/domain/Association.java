@@ -34,10 +34,13 @@ public class Association {
     @Column(length = 50)
     private String allegiance;
 
-    @Column(name = "historical_attire", columnDefinition = "TEXT")
+    // Al poner 65535, Hibernate crea automáticamente un tipo TEXT en MySQL
+    @Column(name = "historical_attire", length = 65535)
     private String historicalAttire;
 
-    @Column(name = "logo_base64", columnDefinition = "LONGTEXT")
+    // Al poner @Lob en un String, Hibernate crea automáticamente un LONGTEXT en MySQL
+    @Lob
+    @Column(name = "logo_base64", length = 16777215)
     private String logoBase64;
 
     // --- RELACIONES BIDIRECCIONALES ---

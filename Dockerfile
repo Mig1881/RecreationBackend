@@ -3,10 +3,7 @@
 # ==========================================
 # Uso una imagen oficial de Maven con Java 21 para compilar
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
-# Establezco el directorio de trabajo dentro del contenedor
 WORKDIR /app
-# OPTIMIZACIÓN CRÍTICA: Copia solo el pom.xml primero.
-# Esto permite a Docker "cachear" las dependencias de Internet.
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src

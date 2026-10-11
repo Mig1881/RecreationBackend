@@ -21,9 +21,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.Arrays;
 
 import java.util.List;
-
 
 @Configuration
 @EnableWebSecurity
@@ -31,7 +32,7 @@ import java.util.List;
 public class ApiConfiguration {
 
     @Autowired
-    private UserDetailsService userDetailsService; // Usamos la interfaz oficial de Spring
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
@@ -76,11 +77,16 @@ public class ApiConfiguration {
         return http.build();
     }
 
+    @Value("${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost}")
+    private String allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Puertos estándar de Vite/React
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:3000"));
+
+        // Convertimos la cadena separada por comas en una lista
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
