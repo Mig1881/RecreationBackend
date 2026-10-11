@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0.32
+    container_name: ane_db_aws
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_aws:/var/lib/mysql
+
+  app:
+    image: mig1881/ane-api-aws:latest
+    container_name: ane_backend_aws
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE}
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_HASHED_PASSWORD=${ADMIN_HASHED_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - ALLOWED_ORIGINS=http://44.222.87.123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+
+  frontend:
+    image: mig1881/mando-central-frontend-aws:latest
+    container_name: mando-central-frontend-aws
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - app
+
+volumes:
+  mysql_data_aws:

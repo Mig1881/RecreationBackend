@@ -17,4 +17,5 @@ public interface EventParticipationRepository extends JpaRepository<EventPartici
 
     // Validar si un miembro ya está inscrito en un evento para no duplicar inscripciones
     boolean existsByEventIdAndMemberId(Long eventId, Long memberId);
+
 }

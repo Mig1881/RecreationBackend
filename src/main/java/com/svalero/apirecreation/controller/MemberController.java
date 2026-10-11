@@ -37,14 +37,12 @@ public class MemberController {
         return new ResponseEntity<>(member, HttpStatus.OK);
     }
 
-    // 🔥 Usamos @Valid y MemberDTO
     @PostMapping
     public ResponseEntity<Member> createMember(@Valid @RequestBody MemberDTO dto) {
         Member createdMember = memberService.save(dto);
         return new ResponseEntity<>(createdMember, HttpStatus.CREATED);
     }
 
-    // 🔥 Usamos @Valid y MemberDTO
     @PutMapping("/{id}")
     public ResponseEntity<Member> updateMember(@PathVariable Long id, @Valid @RequestBody MemberDTO dto) {
         Member updatedMember = memberService.update(id, dto);
